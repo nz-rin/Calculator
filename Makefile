@@ -15,10 +15,8 @@ SRC_FILES		= $(wildcard $(DIR_SRC)/*.cxx)
 # Main object files
 MAIN_O_FILES 	= $(patsubst $(DIR_SRC)/%.cxx, $(DIR_BUILD)/%.o, $(SRC_FILES))
 
-
 # Main
 MAIN_ELF 		= $(DIR_BUILD)/main
-
 
 build-clean:
 	rm -rf $(DIR_BUILD)/*
