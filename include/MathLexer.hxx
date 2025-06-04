@@ -61,7 +61,11 @@ namespace MathLexer{
 			}else if ( _numeric(tokens[i][0]) ){
 				i++;
 				if(i >= tokens.size()){
-					return true;
+					return _bracket_count == 0;
+				}
+
+				if(tokens[i][0] == ')'){
+					continue;
 				}
 
 				//next must be and operator
@@ -73,14 +77,13 @@ namespace MathLexer{
 					return false;
 				}
 
-				//number or operator is fine
-				if( _numeric(tokens[i][0]) ){
-					continue;
-				}else if( !(tokens[i][0] == '+' || tokens[i][0] == '-') ){
+				//number or -+operator or exprs fine
+				if( (tokens[i][0] == '/' || tokens[i][0] == '*') ){
 					return false;
 				}
 				//operator if it falls throught
-				i++;
+				if(_operator(tokens[i][0]))
+					i++;
 			}else{
 				return false;
 			}
