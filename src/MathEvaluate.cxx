@@ -1,19 +1,20 @@
 
 #include <cassert>
 #include <iostream>
+#include <optional>
 
 #include "MathEvaluate.hxx"
 
 #define SILENCE_COMPILER(x) x
 
-SafeValue evaluate(Node *node){
+SafeValue __evaluate_safe_node(Node *node){
 	SafeValue __lhs = (node->get_lhs()->check_empty()) ?
 		node->get_lhs()->get_safevalue() :
-		evaluate(node->get_lhs());
+		__evaluate_safe_node(node->get_lhs());
 	;
 	SafeValue __rhs = (node->get_rhs()->check_empty()) ?
 		node->get_rhs()->get_safevalue() :
-		evaluate(node->get_rhs())
+		__evaluate_safe_node(node->get_rhs())
 	;
 
 	if(__lhs.num_type == F64 || __rhs.num_type == F64 ){
@@ -65,4 +66,12 @@ SafeValue evaluate(Node *node){
 	//THIS STATEMENT SHOULD BE UNREACHABLE
 	assert(false && "  Evaluate Fell through, likely do to a SafeValue not been an F64 or I64");
 	SILENCE_COMPILER(return {});
+}
+
+SafeValue evaluate(Node *MainNode){
+	if(MainNode->get_lhs() == nullptr && MainNode->get_rhs() == nullptr){
+		return MainNode->get_safevalue();
+	}else{
+		return __evaluate_safe_node(MainNode);
+	}
 }

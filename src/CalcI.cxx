@@ -16,21 +16,24 @@ int main(void){
 		if(expr.c_str()[0] == 'q'){
 			break;
 		}
-		std::vector<std::string> token = MathLexer::lex_string(expr);
+		std::optional<std::vector<std::string>> token = MathLexer::lex_string(expr);
+		if(token.has_value()){
+			MathParser p = MathParser();
+			p.set_tokens(&*token);
+			Node *node = p.run();
 
-		MathParser p = MathParser();
-		p.set_tokens(&token);
-		Node *node = p.run();
+			if(!node){
+				continue;
+			}
+			SafeValue val = evaluate(node);
+			std::string answer = (val.num_type == NumType::I64)? std::to_string(val.i64) : std::to_string(val.f64);
+			std::cout << "Answer: " << answer << "\n";
+			delete node;
 
-		if(!node){
-			return 0;
+		}else{
+			std::cerr << "Invalid Token Where Found" << std::endl;
 		}
 
-		SafeValue val = evaluate(node);
-		delete node;
-
-		std::string answer = (val.num_type == NumType::I64)? std::to_string(val.i64) : std::to_string(val.f64);
-		std::cout << "Answer: " << answer << "\n";
 	}
 
 	std::cout << "Run Successfull" << std::endl;

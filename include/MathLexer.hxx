@@ -2,7 +2,9 @@
 #ifndef MATH_LEXER_HXX
 #define MATH_LEXER_HXX
 
-#include <string.h>
+#include <cstring>
+
+#include <optional>
 #include <cstring>
 #include <iostream>
 #include <vector>
@@ -31,7 +33,40 @@ namespace MathLexer{
 		return _numeric(c)  || _numeric_exception(c);
 	}
 
-	inline std::vector<std::string> __lex(const char *math, size_t string_size){
+	inline void __sign_tokens(std::vector<std::string> &tokens){
+	}
+	inline bool __validate_expressions(const std::vector<std::string> &tokens){
+		size_t _bracket_count = 0, i=0;
+		while(i < tokens.size()){
+			if(tokens[i][0] == '('){
+				_bracket_count++;
+				i++;
+			}else if(tokens[i][0] == ')'){
+				_bracket_count--;
+				i++;
+			}else if(tokens[i][0] == '*' || tokens[i][0] == '/' || tokens[i][0] == '+' || tokens[i][0] == '-'){
+				i++;
+				if(i >= tokens.size()){
+					return false;
+				}
+				if(tokens[i][0] == '/' || tokens[i][0] == '*'){
+					return false;
+				}
+			}else if (tokens[i][0] >= '0' && tokens[i][0] <= '9'){
+				i++;
+				if(i >= tokens.size()){
+					return true;
+				}
+				if (tokens[i][0] >= '0' && tokens[i][0] <= '9'){
+					return false;
+				}
+			}else{
+				return false;
+			}
+		}
+	}
+
+	inline std::optional<std::vector<std::string>> __lex(const char *math, size_t string_size){
 		bool failed = false;
 		std::vector<std::string> token = std::vector<std::string>();
 
@@ -61,36 +96,47 @@ namespace MathLexer{
 #if defined LOG_ERROR
 				std::cerr << "\t[ERROR] Invalid Token: \"" << math[i] << "\n";
 #endif
+#if defined LEX_CORE_EARLY_RET_ON_FAIL
+				return std::nullopt;
+#endif
 				failed = true;
 				i++;
 			}
 		}
 
-#if defined LEX_CORE_ABORT_ON_FAIL
 		if(failed){
-			std::cerr << "\t[ERROR] Invalid Tokens where found, Lexing Aborted\n";
-			exit(EXIT_FAILURE);
-		}
+#if defined LOG_ERROR
+			std::cerr << "\t[ERROR] Invalid Tokens were found, Lexing Aborted\n";
 #endif
-
-		return token;
+#if defined LEX_CORE_ABORT_ON_FAIL
+			exit(EXIT_FAILURE);
+#endif
+			return std::nullopt;
+		}else{
+			if(__validate_expressions(token)){
+				__sign_tokens(token);
+				return token;
+			}else{
+				return std::nullopt;
+			}
+		}
 	}
 
 	///NOTE, Ensure string is null terminated, use the variant with str_len for safe working with segments
-	inline std::vector<std::string> c_str(const char *math){
+	inline std::optional<std::vector<std::string>> c_str(const char *math){
 		size_t str_len= strlen(math);
 		return __lex(math, str_len);
 	}
 
-	inline std::vector<std::string> lex_segment(const char *math, size_t str_len){
+	inline std::optional<std::vector<std::string>> lex_segment(const char *math, size_t str_len){
 		return __lex(math, str_len);
 	}
 
-	inline std::vector<std::string> lex_string(std::string math){
+	inline std::optional<std::vector<std::string>> lex_string(std::string math){
 		return __lex(math.data(), math.length());
 	}
 
-	inline std::vector<std::string> lex_string(std::string_view math){
+	inline std::optional<std::vector<std::string>> lex_string(std::string_view math){
 		return __lex(math.data(), math.length());
 	}
 
