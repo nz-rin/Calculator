@@ -58,16 +58,20 @@ namespace MathLexer{
 				token.push_back(sb);
 				i++;
 			}else{
+#if defined LOG_ERROR
 				std::cerr << "\t[ERROR] Invalid Token: \"" << math[i] << "\n";
+#endif
 				failed = true;
 				i++;
 			}
 		}
 
+#if defined LEX_CORE_ABORT_ON_FAIL
 		if(failed){
 			std::cerr << "\t[ERROR] Invalid Tokens where found, Lexing Aborted\n";
 			exit(EXIT_FAILURE);
 		}
+#endif
 
 		return token;
 	}
