@@ -34,10 +34,14 @@ public:
 	inline Node * run(){
 		MathParser::m_index = 0;
 		if(MathParser::m_tokens == nullptr){
-			std::cerr << "  [WARNING] Tokens are null, nothing to Evaluate, Retuning Nullptr" <<std::endl;
+#if defined WARN
+			std::cerr << "  [WARNING] Tokens are null, nothing to Evaluate, Returning Nullptr" <<std::endl;
+#endif
 			return nullptr;
 		}else if(MathParser::m_tokens->size() == 0){
-			std::cerr << "  [WARNING] Empty Tokens, nothing to Evaluate, Retuning Nullptr" <<std::endl;
+#if defined WARN
+			std::cerr << "  [WARNING] Empty Tokens, nothing to Evaluate, Returning Nullptr" <<std::endl;
+#endif
 			return nullptr;
 		}else{
 			if(MathParser::m_tokens->size() == 1){

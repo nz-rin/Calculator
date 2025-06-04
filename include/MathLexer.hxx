@@ -3,6 +3,7 @@
 #define MATH_LEXER_HXX
 
 #include <cstring>
+#include <cassert>
 
 #include <optional>
 #include <cstring>
@@ -34,6 +35,18 @@ namespace MathLexer{
 	}
 
 	inline void __sign_tokens(std::vector<std::string> &tokens){
+		size_t i = 0;
+		while(i < tokens.size()){
+			if(tokens[i][0] == '+' || tokens[i][0] == '-'){
+				i++;
+				if(tokens[i][0] == '+' || tokens[i][0] == '-'){
+					char c = tokens[i][0];
+					tokens.erase(tokens.begin() + i);
+					tokens[i] = c + tokens[i];
+				}
+			}
+			i++;
+		}
 	}
 	inline bool __validate_expressions(const std::vector<std::string> &tokens){
 		size_t _bracket_count = 0, i=0;
@@ -44,26 +57,36 @@ namespace MathLexer{
 			}else if(tokens[i][0] == ')'){
 				_bracket_count--;
 				i++;
-			}else if(tokens[i][0] == '*' || tokens[i][0] == '/' || tokens[i][0] == '+' || tokens[i][0] == '-'){
-				i++;
-				if(i >= tokens.size()){
-					return false;
-				}
-				if(tokens[i][0] == '/' || tokens[i][0] == '*'){
-					return false;
-				}
-			}else if (tokens[i][0] >= '0' && tokens[i][0] <= '9'){
+			//number
+			}else if ( _numeric(tokens[i][0]) ){
 				i++;
 				if(i >= tokens.size()){
 					return true;
 				}
-				if (tokens[i][0] >= '0' && tokens[i][0] <= '9'){
+
+				//next must be and operator
+				if( !_operator(tokens[i][0]) ){
 					return false;
 				}
+				i++;
+				if(i >= tokens.size()){
+					return false;
+				}
+
+				//number or operator is fine
+				if( _numeric(tokens[i][0]) ){
+					continue;
+				}else if( !(tokens[i][0] == '+' || tokens[i][0] == '-') ){
+					return false;
+				}
+				//operator if it falls throught
+				i++;
 			}else{
 				return false;
 			}
 		}
+		//assert(false && __FILE__" __validate_expressions() fell through");
+		return _bracket_count==0;
 	}
 
 	inline std::optional<std::vector<std::string>> __lex(const char *math, size_t string_size){
