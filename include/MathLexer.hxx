@@ -57,6 +57,27 @@ namespace MathLexer{
 			}else if(tokens[i][0] == ')'){
 				_bracket_count--;
 				i++;
+
+				if(i >= tokens.size()){
+					return _bracket_count == 0;
+				}
+
+				//next must be and operator
+				if( !_operator(tokens[i][0]) ){
+					return false;
+				}
+				i++;
+				if(i >= tokens.size()){
+					return false;
+				}
+
+				//number or -+operator or exprs fine
+				if( (tokens[i][0] == '/' || tokens[i][0] == '*') ){
+					return false;
+				}
+				//operator if it falls throught
+				if(_operator(tokens[i][0]))
+					i++;
 			//number
 			}else if ( _numeric(tokens[i][0]) ){
 				i++;
