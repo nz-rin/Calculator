@@ -120,7 +120,7 @@ namespace MathLexer{
 				i++;
 			}else{
 #if defined LOG_ERROR
-				std::cerr << "\t[ERROR] Invalid Token: \"" << math[i] << "\n";
+				std::cerr << "\t[ERROR] Invalid Token: \"" << math[i] << "\"\n";
 #endif
 #if defined LEX_CORE_EARLY_RET_ON_FAIL
 				return std::nullopt;
