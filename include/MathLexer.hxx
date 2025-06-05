@@ -39,14 +39,32 @@ namespace MathLexer{
 		while(i < tokens.size()){
 			if(tokens[i][0] == '+' || tokens[i][0] == '-'){
 				i++;
+				if(tokens[i][0] == '-' && tokens[i-1][0] == '-'){
+					tokens.erase(tokens.begin() + i);
+					tokens[i-1] = '+';
+				}else if(tokens[i][0] == '+' && tokens[i-1][0] == '+'){
+					tokens.erase(tokens.begin() + i);
+				}else if(tokens[i][0] == '+' || tokens[i][0] == '-'){
+					if(_numeric(tokens[i+1][0])){
+						char c = tokens[i][0];
+						tokens.erase(tokens.begin() + i);
+						tokens[i] = c + tokens[i];
+					}
+					i++;
+				}
+			}else if (tokens[i][0] == '('){
+				i++;
 				if(tokens[i][0] == '+' || tokens[i][0] == '-'){
 					char c = tokens[i][0];
 					tokens.erase(tokens.begin() + i);
 					tokens[i] = c + tokens[i];
 				}
+
+			}else{
+				i++;
 			}
-			i++;
 		}
+
 	}
 	inline bool __validate_expressions(const std::vector<std::string> &tokens){
 		size_t _bracket_count = 0, i=0;
@@ -54,6 +72,17 @@ namespace MathLexer{
 			if(tokens[i][0] == '('){
 				_bracket_count++;
 				i++;
+
+				if(i >= tokens.size()){
+					return _bracket_count == 0;
+				}
+				if(tokens[i][0] == '+' || tokens[i][0] == '-'){
+					i++;
+				}else if (_numeric(tokens[i][0])){
+					continue;
+				}else{
+					return false;
+				}
 			}else if(tokens[i][0] == ')'){
 				_bracket_count--;
 				i++;
